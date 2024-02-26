@@ -56,10 +56,10 @@ export default function Sidebar() {
             <div className='flex items-center space-x-4'>
               <Avatar>
                 <AvatarImage src='/avatars/01.png' />
-                <AvatarFallback>OM</AvatarFallback>
+                <AvatarFallback>LB</AvatarFallback>
               </Avatar>
               <div>
-                <p className='text-lg font-medium leading-none text-left'>Sofia Davis</p>
+                <p className='text-lg font-medium leading-none text-left'>Lucca Bessa</p>
               </div>
             </div>
           </Button>
