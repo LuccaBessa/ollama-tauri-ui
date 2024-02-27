@@ -8,7 +8,7 @@ export default function SettingsModelPage() {
       <div className='space-y-6'>
         <div>
           <h3 className='text-lg font-medium'>Models</h3>
-          <p className='text-sm text-muted-foreground'>Manage your models. Download, delete and configure ollama.</p>
+          <p className='text-sm text-muted-foreground'>Manage your models. Download and configure ollama.</p>
         </div>
         <Separator />
         <ModelForm />

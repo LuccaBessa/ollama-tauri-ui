@@ -2,6 +2,7 @@ import { LucideIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NavProps {
   links: {
@@ -14,7 +15,7 @@ interface NavProps {
 
 export function Nav({ links }: NavProps) {
   return (
-    <div className='group flex flex-col gap-4 py-2'>
+    <ScrollArea className='group flex flex-col gap-4 py-2'>
       <nav className='grid gap-1 px-2 '>
         {links.map((link, index) => (
           <a key={index} href='#' className={cn(buttonVariants({ variant: link.variant, size: 'sm' }), link.variant === 'default' && 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white', 'justify-start')}>
@@ -24,6 +25,6 @@ export function Nav({ links }: NavProps) {
           </a>
         ))}
       </nav>
-    </div>
+    </ScrollArea>
   );
 }
