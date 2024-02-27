@@ -1,12 +1,12 @@
 import { Settings } from '@/components/settings/settings.component';
 import { Nav } from '@/components/sidebar/components/nav';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Pencil2Icon } from '@radix-ui/react-icons';
-import { MessagesSquare } from 'lucide-react';
+import { MessagesSquare, Settings as SettingsIcon } from 'lucide-react';
 
 export default function Sidebar() {
   return (
@@ -55,11 +55,12 @@ export default function Sidebar() {
           <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')}>
             <div className='flex items-center space-x-4'>
               <Avatar>
-                <AvatarImage src='/avatars/01.png' />
-                <AvatarFallback>LB</AvatarFallback>
+                <AvatarFallback>
+                  <SettingsIcon />
+                </AvatarFallback>
               </Avatar>
               <div>
-                <p className='text-lg font-medium leading-none text-left'>Lucca Bessa</p>
+                <p className='text-lg font-medium leading-none text-left'>Settings</p>
               </div>
             </div>
           </Button>
@@ -67,7 +68,7 @@ export default function Sidebar() {
         <DialogContent className='min-w-[800px] min-h-[625px]'>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>Manage your account settings and set e-mail preferences.</DialogDescription>
+            <DialogDescription>Manage OllamaUI settings and ollama preferences.</DialogDescription>
           </DialogHeader>
           <Separator />
           <Settings />

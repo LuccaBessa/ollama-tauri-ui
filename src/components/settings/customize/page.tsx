@@ -1,7 +1,7 @@
+import { CustomizeForm } from '@/components/settings/customize/Customize-form';
 import { Separator } from '@/components/ui/separator';
-import { ProfileForm } from './profile-form';
 
-export default function SettingsProfilePage() {
+export default function SettingsCustomizePage() {
   return (
     <div className='space-y-6'>
       <div>
@@ -9,7 +9,7 @@ export default function SettingsProfilePage() {
         <p className='text-sm text-muted-foreground'>This is how the models will get context about you.</p>
       </div>
       <Separator />
-      <ProfileForm />
+      <CustomizeForm />
     </div>
   );
 }

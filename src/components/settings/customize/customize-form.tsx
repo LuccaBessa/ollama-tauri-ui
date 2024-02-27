@@ -1,4 +1,3 @@
-'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -23,7 +22,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 // This can come from your database or API.
 const defaultValues: Partial<ProfileFormValues> = {};
 
-export function ProfileForm() {
+export function CustomizeForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,

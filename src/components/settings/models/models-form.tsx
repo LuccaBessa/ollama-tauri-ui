@@ -5,42 +5,84 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-const ollamaFormSchema = z.object({
-  path: z.string(),
-});
-
-type OllamaFormValues = z.infer<typeof ollamaFormSchema>;
-
-const defaultValuesOllama: Partial<OllamaFormValues> = {
-  path: 'http://localhost:11434/api',
-};
-
-const modelFormSchema = z.object({
-  query: z.string(),
-});
-
-type ModelFormValues = z.infer<typeof modelFormSchema>;
-
-const defaultValuesModel: Partial<ModelFormValues> = {
-  query: '',
-};
+import { toast } from 'sonner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { OllamaService } from '@/services/ollama.service';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { ModelResponse } from '@/services/models/model';
+import { Loader, Trash } from 'lucide-react';
 
 export function ModelForm() {
+  const getInstalledModelsList = async (): Promise<ModelResponse> => {
+    try {
+      return await OllamaService.getAllInstalledModels();
+    } catch (error) {
+      return { models: [] };
+    }
+  };
+
+  const { data, refetch } = useQuery<ModelResponse>({
+    queryKey: ['models'],
+    queryFn: getInstalledModelsList,
+  });
+
+  const deleteInstalledModel = async (name: string): Promise<void> => {
+    try {
+      OllamaService.deleteInstalledVersion(name);
+      refetch();
+    } catch (error) {
+      toast(`Deleting ${name} failed`);
+    }
+  };
+
+  const deleteModelMutation = useMutation({
+    mutationKey: ['modelsDelete'],
+    mutationFn: deleteInstalledModel,
+  });
+
+  const downloadModel = async (name: string): Promise<void> => {
+    try {
+      OllamaService.downloadVersion(name);
+      modelForm.reset();
+      refetch();
+    } catch (error) {
+      toast(`Download ${name} failed`);
+    }
+  };
+
+  const downloadModelMutation = useMutation({
+    mutationKey: ['modelsDownload'],
+    mutationFn: downloadModel,
+  });
+
+  const ollamaFormSchema = z.object({
+    path: z.string(),
+  });
+
+  type OllamaFormValues = z.infer<typeof ollamaFormSchema>;
+
+  const defaultValuesOllama: Partial<OllamaFormValues> = {
+    path: localStorage.getItem('base_ollama_url')!,
+  };
+
+  const modelFormSchema = z.object({
+    query: z.string(),
+  });
+
+  type ModelFormValues = z.infer<typeof modelFormSchema>;
+
+  const defaultValuesModel: Partial<ModelFormValues> = {
+    query: '',
+  };
+
   const ollamaForm = useForm<OllamaFormValues>({
     resolver: zodResolver(ollamaFormSchema),
     defaultValues: defaultValuesOllama,
   });
 
   function onSubmitOllama(data: OllamaFormValues) {
-    alert({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    localStorage.setItem('base_ollama_url', data.path);
+    toast('Ollama API path updated');
   }
 
   const modelForm = useForm<ModelFormValues>({
@@ -49,14 +91,7 @@ export function ModelForm() {
   });
 
   function onSubmitModel(data: ModelFormValues) {
-    alert({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    downloadModelMutation.mutate(data.query);
   }
 
   return (
@@ -88,7 +123,7 @@ export function ModelForm() {
             name='query'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Search Model</FormLabel>
+                <FormLabel>Download Model</FormLabel>
                 <FormControl>
                   <Input placeholder='Type the name of the model' {...field} />
                 </FormControl>
@@ -96,11 +131,35 @@ export function ModelForm() {
               </FormItem>
             )}
           />
-          <Button className='self-end' type='submit'>
-            Download
+          <Button className='self-end' type='submit' disabled={downloadModelMutation.isPending}>
+            {downloadModelMutation.isPending ? <Loader className='h-4 w-4 animate-spin' /> : 'Download'}
           </Button>
         </form>
       </Form>
+      <Table className='mt-6'>
+        <TableHeader>
+          <TableRow>
+            <TableHead className='w-[100px]'>Model</TableHead>
+            <TableHead>Format</TableHead>
+            <TableHead>Parameter Size</TableHead>
+            <TableHead className='text-right'></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data?.models.map((model) => (
+            <TableRow key={model.name}>
+              <TableCell className='font-medium'>{model.name}</TableCell>
+              <TableCell>{model.details.format}</TableCell>
+              <TableCell>{model.details.parameter_size}</TableCell>
+              <TableCell>
+                <Button variant='ghost' size='icon'>
+                  <Trash className='h-4 w-4' onClick={() => deleteModelMutation.mutate(model.name)} />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
