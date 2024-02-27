@@ -26,7 +26,7 @@ export default function Chat() {
         <div className='flex flex-row items-center w-full gap-2'>
           <Input placeholder='Message model...' />
           <Button size='icon'>
-            <Send />
+            <Send className='h-6 w-6' />
           </Button>
         </div>
       </section>

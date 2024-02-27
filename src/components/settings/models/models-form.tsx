@@ -60,7 +60,7 @@ export function ModelForm() {
   }
 
   return (
-    <>
+    <div className='px-1'>
       <Form {...ollamaForm}>
         <form onSubmit={ollamaForm.handleSubmit(onSubmitOllama)} className='flex flex-col space-y-8'>
           <FormField
@@ -101,6 +101,6 @@ export function ModelForm() {
           </Button>
         </form>
       </Form>
-    </>
+    </div>
   );
 }

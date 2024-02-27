@@ -44,7 +44,7 @@ export const Settings = (): ReactElement => {
               ))}
             </nav>
           </aside>
-          <ScrollArea className='flex-1 lg:max-w-2xl px-6 h-[500px]'>{sidebarNavItems.filter((item) => item.href === selectedPage)[0].component()}</ScrollArea>
+          <ScrollArea className='flex-1 lg:max-w-2xl px-4 h-[500px]'>{sidebarNavItems.filter((item) => item.href === selectedPage)[0].component()}</ScrollArea>
         </div>
       </div>
     </>
