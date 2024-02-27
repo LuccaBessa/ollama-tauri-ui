@@ -95,7 +95,7 @@ export function ModelForm() {
   }
 
   return (
-    <div className='px-1'>
+    <div className='flex flex-col px-1'>
       <Form {...ollamaForm}>
         <form onSubmit={ollamaForm.handleSubmit(onSubmitOllama)} className='flex flex-col space-y-8'>
           <FormField
@@ -146,20 +146,23 @@ export function ModelForm() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.models.map((model) => (
-            <TableRow key={model.name}>
-              <TableCell className='font-medium'>{model.name}</TableCell>
-              <TableCell>{model.details.format}</TableCell>
-              <TableCell>{model.details.parameter_size}</TableCell>
-              <TableCell>
-                <Button variant='ghost' size='icon'>
-                  <Trash className='h-4 w-4' onClick={() => deleteModelMutation.mutate(model.name)} />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {data?.models &&
+            data?.models.length > 0 &&
+            data?.models.map((model) => (
+              <TableRow key={model.name}>
+                <TableCell className='font-medium'>{model.name}</TableCell>
+                <TableCell>{model.details.format}</TableCell>
+                <TableCell>{model.details.parameter_size}</TableCell>
+                <TableCell>
+                  <Button variant='ghost' size='icon'>
+                    <Trash className='h-4 w-4' onClick={() => deleteModelMutation.mutate(model.name)} />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
+      {!data?.models || (data?.models.length === 0 && <p className='self-center mt-4'>No models installed</p>)}
     </div>
   );
 }

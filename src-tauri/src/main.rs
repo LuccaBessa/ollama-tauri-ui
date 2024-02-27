@@ -1,15 +1,42 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+use tauri_plugin_sql::{Migration, MigrationKind};
 
 fn main() {
+    let migrations = vec![
+        Migration {
+            version: 1,
+            description: "create_initial_chats_table",
+            sql: "CREATE TABLE IF NOT EXISTS chats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                model TEXT,
+                lastActivity DATETIME NOT NULL
+              );",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 1,
+            description: "create_initial_messages_table",
+            sql: "CREATE TABLE IF NOT EXISTS messages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    chatId INTEGER NOT NULL,
+                    role TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    timestamp DATETIME NOT NULL,
+                    FOREIGN KEY(chatId) REFERENCES chats(id)
+                );",
+            kind: MigrationKind::Up,
+        },
+    ];
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:chats.db", migrations)
+                .build(),
+        )
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

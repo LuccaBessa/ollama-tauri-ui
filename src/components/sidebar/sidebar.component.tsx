@@ -5,50 +5,65 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { createChat, getAllChats } from '@/services/chat.service';
 import { Pencil2Icon } from '@radix-ui/react-icons';
-import { MessagesSquare, Settings as SettingsIcon } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { LucideIcon, MessagesSquare, Settings as SettingsIcon } from 'lucide-react';
+import { useMemo } from 'react';
+import { toast } from 'sonner';
 
 export default function Sidebar() {
+  const getChatsList = async (): Promise<ChatSummary[]> => {
+    try {
+      return await getAllChats();
+    } catch (error) {
+      toast('Error loading chats');
+      return [];
+    }
+  };
+
+  const { data, refetch } = useQuery<ChatSummary[]>({
+    queryKey: ['chats'],
+    queryFn: getChatsList,
+  });
+
+  const createNewChat = async (): Promise<void> => {
+    try {
+      await createChat('Untitled chat');
+
+      refetch();
+    } catch (error) {
+      toast('Error creating new chat');
+      console.error(error);
+    }
+  };
+
+  const createNewChatMutation = useMutation({
+    mutationKey: ['newchat'],
+    mutationFn: createNewChat,
+  });
+
+  const chatSummaryList: { id: number; title: string; icon: LucideIcon }[] = useMemo(() => {
+    return data && data.length > 0
+      ? data!.map((cs) => ({
+          id: cs.id,
+          title: cs.name,
+          icon: MessagesSquare,
+          variant: 'ghost',
+        }))
+      : [];
+  }, [data]);
+
   return (
-    <div className='flex flex-col w-[260px] h-full'>
-      <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')}>
+    <div className='flex flex-col w-[300px] h-screen'>
+      <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')} onClick={() => createNewChatMutation.mutate()}>
         <div className='flex item-center w-full justify-between'>
           <span>New Chat</span>
           <Pencil2Icon />
         </div>
       </Button>
-      <div className='flex-grow'>
-        <Separator />
-        <Nav
-          links={[
-            {
-              title: 'Untitled Chat',
-              icon: MessagesSquare,
-              variant: 'ghost',
-            },
-            {
-              title: 'Untitled Chat',
-              icon: MessagesSquare,
-              variant: 'ghost',
-            },
-            {
-              title: 'Untitled Chat',
-              icon: MessagesSquare,
-              variant: 'ghost',
-            },
-            {
-              title: 'Untitled Chat',
-              icon: MessagesSquare,
-              variant: 'ghost',
-            },
-            {
-              title: 'Untitled Chat',
-              icon: MessagesSquare,
-              variant: 'ghost',
-            },
-          ]}
-        />
-      </div>
+      <Separator />
+      <Nav chats={chatSummaryList} refetch={refetch} />
       <Separator />
       <Dialog>
         <DialogTrigger asChild>
