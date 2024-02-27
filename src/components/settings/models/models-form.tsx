@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ollamaFormSchema = z.object({
   path: z.string(),
@@ -61,7 +60,7 @@ export function ModelForm() {
   }
 
   return (
-    <ScrollArea>
+    <>
       <Form {...ollamaForm}>
         <form onSubmit={ollamaForm.handleSubmit(onSubmitOllama)} className='flex flex-col space-y-8'>
           <FormField
@@ -102,6 +101,6 @@ export function ModelForm() {
           </Button>
         </form>
       </Form>
-    </ScrollArea>
+    </>
   );
 }

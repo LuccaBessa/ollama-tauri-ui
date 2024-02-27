@@ -10,7 +10,7 @@ import { MessagesSquare } from 'lucide-react';
 
 export default function Sidebar() {
   return (
-    <div className='flex flex-col min-w-[350px] h-full'>
+    <div className='flex flex-col w-[260px] h-full'>
       <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')}>
         <div className='flex item-center w-full justify-between'>
           <span>New Chat</span>
@@ -64,7 +64,7 @@ export default function Sidebar() {
             </div>
           </Button>
         </DialogTrigger>
-        <DialogContent className='min-w-[800px]'>
+        <DialogContent className='min-w-[800px] min-h-[625px]'>
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>Manage your account settings and set e-mail preferences.</DialogDescription>
