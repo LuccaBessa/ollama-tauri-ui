@@ -1,3 +1,4 @@
+import { Chat, ChatSummary, Message } from '@/services/models/chat';
 import Database from '@tauri-apps/plugin-sql';
 
 export async function createChat(name: string): Promise<number | null> {
@@ -28,7 +29,7 @@ export async function deleteChat(chatId: number): Promise<boolean> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    // await db.execute('DELETE FROM messages WHERE id = ?', [chatId]);
+    await db.execute('DELETE FROM messages WHERE id = ?', [chatId]);
     await db.execute('DELETE FROM chats WHERE id = ?', [chatId]);
 
     return true;
@@ -42,26 +43,25 @@ export async function getChat(chatId: number): Promise<Chat | null> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    const chatResult: any[] = await db.select('SELECT * FROM chats WHERE id = ?', [chatId]);
-    if (chatResult && chatResult.length > 0) {
-      const chat = chatResult[0];
-      const messagesResult: any[] = await db.select('SELECT * FROM messages WHERE chatId = ?', [chatId]);
-      const messages: Message[] = messagesResult.map((message: any) => ({
-        role: message.role,
-        content: message.content,
-        timestamp: new Date(message.timestamp),
-      }));
-      return {
-        id: chat.id,
-        name: chat.name,
-        model: chat.model,
-        lastActivity: new Date(chat.lastActivity),
-        messages: messages,
-      };
+    const chatResult: Chat[] = await db.select('SELECT * FROM chats WHERE id = $1', [chatId]);
+
+    if (chatResult.length === 0) {
+      return null;
     }
-    return null;
+
+    const chat = chatResult[0];
+
+    const messagesResult: Message[] = await db.select('SELECT * FROM messages WHERE chatId = $1 ORDER BY timestamp', [chatId]);
+
+    return {
+      id: chat.id,
+      name: chat.name,
+      model: chat.model,
+      lastActivity: chat.lastActivity,
+      messages: messagesResult,
+    };
   } catch (error) {
-    console.error('Error getting chat:', error);
+    console.error('Error getting chat: ' + error);
     return null;
   }
 }
@@ -80,7 +80,7 @@ export async function getAllChats(): Promise<ChatSummary[]> {
       chatSummaries.push({
         id: chat.id,
         name: chat.name,
-        lastActivity: new Date(chat.lastActivity),
+        lastActivity: new Date(chat.lastActivity).toISOString(),
       });
     }
 

@@ -1,4 +1,3 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri_plugin_sql::{Migration, MigrationKind};
@@ -13,20 +12,20 @@ fn main() {
                 name TEXT NOT NULL,
                 model TEXT,
                 lastActivity DATETIME NOT NULL
-              );",
+            );",
             kind: MigrationKind::Up,
         },
         Migration {
-            version: 1,
+            version: 2,
             description: "create_initial_messages_table",
             sql: "CREATE TABLE IF NOT EXISTS messages (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    chatId INTEGER NOT NULL,
-                    role TEXT NOT NULL,
-                    content TEXT NOT NULL,
-                    timestamp DATETIME NOT NULL,
-                    FOREIGN KEY(chatId) REFERENCES chats(id)
-                );",
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chatId INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                timestamp DATETIME NOT NULL,
+                FOREIGN KEY(chatId) REFERENCES chats(id)
+            );",
             kind: MigrationKind::Up,
         },
     ];

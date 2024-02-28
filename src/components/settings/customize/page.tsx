@@ -1,4 +1,4 @@
-import { CustomizeForm } from '@/components/settings/customize/Customize-form';
+import { CustomizeForm } from '@/components/settings/customize/customize-form';
 import { Separator } from '@/components/ui/separator';
 
 export default function SettingsCustomizePage() {

@@ -5,14 +5,19 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { createChat, getAllChats } from '@/services/chat.service';
+import { createChat, getAllChats, getChat } from '@/services/chat.service';
+import { ChatSummary } from '@/services/models/chat';
+import { chatAtom } from '@/store/chatAtom';
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAtom } from 'jotai';
 import { LucideIcon, MessagesSquare, Settings as SettingsIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
 export default function Sidebar() {
+  const [_, setChat] = useAtom(chatAtom);
+
   const getChatsList = async (): Promise<ChatSummary[]> => {
     try {
       return await getAllChats();
@@ -27,9 +32,21 @@ export default function Sidebar() {
     queryFn: getChatsList,
   });
 
+  const getChatInfo = async (id: number): Promise<void> => {
+    try {
+      const response = await getChat(id);
+
+      response && setChat(response);
+    } catch (error) {
+      toast('Error loading current chat');
+    }
+  };
+
   const createNewChat = async (): Promise<void> => {
     try {
-      await createChat('Untitled chat');
+      const response = await createChat('Untitled chat');
+
+      response && getChatInfo(response);
 
       refetch();
     } catch (error) {
@@ -44,7 +61,7 @@ export default function Sidebar() {
   });
 
   const chatSummaryList: { id: number; title: string; icon: LucideIcon }[] = useMemo(() => {
-    return data && data.length > 0
+    return data
       ? data!.map((cs) => ({
           id: cs.id,
           title: cs.name,
@@ -63,7 +80,7 @@ export default function Sidebar() {
         </div>
       </Button>
       <Separator />
-      <Nav chats={chatSummaryList} refetch={refetch} />
+      <Nav chats={chatSummaryList} refetch={refetch} onClick={(id: number) => getChatInfo(id)} />
       <Separator />
       <Dialog>
         <DialogTrigger asChild>

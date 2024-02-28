@@ -1,19 +1,19 @@
-interface Chat {
+export interface Chat {
   id: number;
   name: string;
   model: string;
-  lastActivity: Date;
+  lastActivity: string;
   messages: Message[];
 }
 
-interface Message {
+export interface Message {
   role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
+  timestamp: string;
 }
 
-interface ChatSummary {
+export interface ChatSummary {
   id: number;
   name: string;
-  lastActivity: Date;
+  lastActivity: string;
 }
