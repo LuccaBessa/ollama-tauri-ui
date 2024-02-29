@@ -1,20 +1,20 @@
 import SettingsModelPage from '@/components/settings/models/page';
 import SettingsAppearancePage from '@/components/settings/appearance/page';
-import SettingsCustomizePage from '@/components/settings/customize/page';
+// import SettingsCustomizePage from '@/components/settings/customize/page';
 import { useState, type ReactElement } from 'react';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const Settings = (): ReactElement => {
-  const [selectedPage, setSelectedPage] = useState('/customize');
+  const [selectedPage, setSelectedPage] = useState('/models');
 
   const sidebarNavItems = [
-    {
-      title: 'Customize',
-      href: '/customize',
-      component: SettingsCustomizePage,
-    },
+    // {
+    //   title: 'Customize',
+    //   href: '/customize',
+    //   component: SettingsCustomizePage,
+    // },
     {
       title: 'Models',
       href: '/models',

@@ -43,6 +43,7 @@ export default function ModelCombobox({ model, setModel }: IProps) {
           <CommandEmpty>No model found.</CommandEmpty>
           <CommandGroup>
             {data &&
+              data.models &&
               data.models.length > 0 &&
               data.models.map((item) => (
                 <CommandItem
