@@ -1,4 +1,4 @@
-import ModelCombobox from '@/components/chat/components/modelCombobox.component';
+import ModelCombobox from '@/components/chat/components/model-combobox.component';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
