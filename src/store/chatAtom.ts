@@ -1,4 +1,3 @@
-import { Chat } from '@/services/models/chat';
 import { atom } from 'jotai';
 
 export const defaultChat = {
@@ -9,4 +8,4 @@ export const defaultChat = {
   messages: [],
 };
 
-export const chatAtom = atom<Chat>(defaultChat);
+export const currentChatIdAtom = atom<number | undefined>(undefined);

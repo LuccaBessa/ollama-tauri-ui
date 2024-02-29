@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { deleteChat } from '@/services/chat.service';
 import { useAtom } from 'jotai';
-import { chatAtom, defaultChat } from '@/store/chatAtom';
+import { currentChatIdAtom } from '@/store/chatAtom';
 import { cn } from '@/lib/utils';
 
 interface NavProps {
@@ -20,7 +20,7 @@ interface NavProps {
 }
 
 export function Nav({ chats, refetch, onClick }: NavProps) {
-  const [chat, setChat] = useAtom(chatAtom);
+  const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom);
 
   const deleteSelectedChat = async (chatId: number): Promise<void> => {
     try {
@@ -28,10 +28,9 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
 
       refetch();
 
-      chat.id === chatId && setChat(defaultChat);
+      currentChatId && currentChatId === chatId && setCurrentChatId(undefined);
     } catch (error) {
       toast('Error deleting chat');
-      console.error(error);
     }
   };
 
@@ -41,15 +40,15 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
         {chats.map((item, index) => (
           <ContextMenu>
             <ContextMenuTrigger>
-              <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), item.id === chat.id && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
+              <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), currentChatId && item.id === currentChatId && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
                 <item.icon className='mr-2 h-4 w-4' />
                 {item.title}
               </Button>
             </ContextMenuTrigger>
             <ContextMenuContent>
-              <ContextMenuItem className='flex gap-2' onClick={() => deleteSelectedChat(chat.id)}>
+              <ContextMenuItem className='flex gap-2' onClick={() => deleteSelectedChat(item.id)}>
                 <Trash className='w-4 h-4' />
-                Delete {item.id}
+                Delete
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
@@ -57,8 +56,6 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
       </nav>
     </ScrollArea>
   ) : (
-    <div className='flex h-full justify-center items-center'>
-      <p>No Chats</p>
-    </div>
+    <div className='h-full ' />
   );
 }

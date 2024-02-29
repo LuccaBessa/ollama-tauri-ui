@@ -1,27 +1,29 @@
 import { Chat, ChatSummary, Message } from '@/services/models/chat';
 import Database from '@tauri-apps/plugin-sql';
 
-export async function createChat(name: string): Promise<number | null> {
+export async function createChat(name: string, model: string): Promise<number> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    const result = await db.execute('INSERT INTO chats (name, lastActivity) VALUES (?, ?)', [name, new Date().toISOString()]);
+    const result = await db.execute('INSERT INTO chats (name, lastActivity, model) VALUES (?, ?, ?)', [name, new Date().toISOString(), model]);
+
     return result.lastInsertId;
   } catch (error) {
     console.error('Error creating chat:', error);
-    return null;
+    throw new Error(`Unable to create chat: ${error}.`);
   }
 }
 
-export async function addMessage(chatId: number, role: 'user' | 'assistant', content: string): Promise<boolean> {
+export async function addMessage(chatId: number, role: 'user' | 'assistant' | 'system', content: string): Promise<number> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    await db.execute('INSERT INTO messages (chatId, role, content, timestamp) VALUES (?, ?, ?, ?)', [chatId, role, content, new Date().toISOString()]);
-    return true;
+    const result = await db.execute('INSERT INTO messages (chatId, role, content, timestamp) VALUES (?, ?, ?, ?)', [chatId, role, content, new Date().toISOString()]);
+
+    return result.lastInsertId;
   } catch (error) {
     console.error('Error adding message:', error);
-    return false;
+    throw new Error(`Unable to add message: ${error}.`);
   }
 }
 
@@ -29,13 +31,13 @@ export async function deleteChat(chatId: number): Promise<boolean> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    await db.execute('DELETE FROM messages WHERE id = ?', [chatId]);
+    await db.execute('DELETE FROM messages WHERE chatId = ?', [chatId]);
     await db.execute('DELETE FROM chats WHERE id = ?', [chatId]);
 
     return true;
   } catch (error) {
-    console.error('Error deleting chat:', error);
-    return false;
+    console.error('Error deleting chat: ' + JSON.stringify(error));
+    throw new Error(`Unable to delete chat: ${error}.`);
   }
 }
 
@@ -62,7 +64,7 @@ export async function getChat(chatId: number): Promise<Chat | null> {
     };
   } catch (error) {
     console.error('Error getting chat: ' + error);
-    return null;
+    throw new Error(`Unable to get chat: ${error}.`);
   }
 }
 
@@ -87,6 +89,6 @@ export async function getAllChats(): Promise<ChatSummary[]> {
     return chatSummaries;
   } catch (error) {
     console.error('Error getting all chats:', error);
-    return [];
+    throw new Error(`Unable to get all chats: ${error}.`);
   }
 }

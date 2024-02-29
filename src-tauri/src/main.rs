@@ -23,7 +23,7 @@ fn main() {
                 chatId INTEGER NOT NULL,
                 role TEXT NOT NULL,
                 content TEXT NOT NULL,
-                timestamp DATETIME NOT NULL,
+                timestamp TEXT NOT NULL,
                 FOREIGN KEY(chatId) REFERENCES chats(id)
             );",
             kind: MigrationKind::Up,

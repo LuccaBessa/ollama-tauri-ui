@@ -5,18 +5,18 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { createChat, getAllChats, getChat } from '@/services/chat.service';
+import { getAllChats, getChat } from '@/services/chat.service';
 import { ChatSummary } from '@/services/models/chat';
-import { chatAtom } from '@/store/chatAtom';
+import { currentChatIdAtom } from '@/store/chatAtom';
 import { Pencil2Icon } from '@radix-ui/react-icons';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 import { LucideIcon, MessagesSquare, Settings as SettingsIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
 export default function Sidebar() {
-  const [_, setChat] = useAtom(chatAtom);
+  const [_, setCurrentChatId] = useAtom(currentChatIdAtom);
 
   const getChatsList = async (): Promise<ChatSummary[]> => {
     try {
@@ -36,29 +36,11 @@ export default function Sidebar() {
     try {
       const response = await getChat(id);
 
-      response && setChat(response);
+      response && setCurrentChatId(response.id);
     } catch (error) {
       toast('Error loading current chat');
     }
   };
-
-  const createNewChat = async (): Promise<void> => {
-    try {
-      const response = await createChat('Untitled chat');
-
-      response && getChatInfo(response);
-
-      refetch();
-    } catch (error) {
-      toast('Error creating new chat');
-      console.error(error);
-    }
-  };
-
-  const createNewChatMutation = useMutation({
-    mutationKey: ['newchat'],
-    mutationFn: createNewChat,
-  });
 
   const chatSummaryList: { id: number; title: string; icon: LucideIcon }[] = useMemo(() => {
     return data
@@ -73,7 +55,7 @@ export default function Sidebar() {
 
   return (
     <div className='flex flex-col w-[300px] h-screen'>
-      <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')} onClick={() => createNewChatMutation.mutate()}>
+      <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')} onClick={() => setCurrentChatId(undefined)}>
         <div className='flex item-center w-full justify-between'>
           <span>New Chat</span>
           <Pencil2Icon />
