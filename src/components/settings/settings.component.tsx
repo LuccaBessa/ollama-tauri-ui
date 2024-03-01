@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import SettingsAboutPage from '@/components/settings/about/page';
 
 export const Settings = (): ReactElement => {
   const [selectedPage, setSelectedPage] = useState('/models');
@@ -25,11 +26,16 @@ export const Settings = (): ReactElement => {
       href: '/appearance',
       component: SettingsAppearancePage,
     },
+    {
+      title: 'About',
+      href: '/about',
+      component: SettingsAboutPage,
+    },
   ];
 
   return (
     <div className='hidden space-y-6 p-2 md:block'>
-      <div className='flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0'>
+      <div className='flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0 h-full'>
         <aside className='-mx-4 lg:w-1/5'>
           <nav className={cn('flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1')}>
             {sidebarNavItems.map((item) => (
