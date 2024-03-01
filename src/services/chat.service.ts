@@ -92,3 +92,16 @@ export async function getAllChats(): Promise<ChatSummary[]> {
     throw new Error(`Unable to get all chats: ${error}.`);
   }
 }
+
+export async function updateChatName(chatId: number, newName: string): Promise<void> {
+  try {
+    const db = await Database.load('sqlite:chats.db');
+
+    await db.execute('UPDATE chats SET name = ? WHERE id = ?', [newName, chatId]);
+
+    console.log('Chat name updated successfully.');
+  } catch (error) {
+    console.error('Error updating chat name:', error);
+    throw new Error(`Unable to update chat name: ${error}.`);
+  }
+}
