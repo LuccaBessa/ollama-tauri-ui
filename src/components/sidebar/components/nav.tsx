@@ -10,6 +10,7 @@ import { currentChatIdAtom } from '@/store/chatAtom';
 import { cn } from '@/lib/utils';
 import { KeyboardEvent, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface NavProps {
   chats: {
@@ -25,6 +26,8 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
   const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom);
   const [selectedChat, setSelectedChat] = useState<number | null>();
   const [title, setTitle] = useState<string>('');
+  const [isRenaming, setIsRenaming] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
 
   const deleteSelectedChat = async (chatId: number): Promise<void> => {
     try {
@@ -58,66 +61,92 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
       }
       setSelectedChat(undefined);
       setTitle('');
+      setIsRenaming(false);
     }
   };
 
   return chats.length > 0 ? (
-    <ScrollArea className='flex-grow p-4'>
-      <nav className='grid gap-4 '>
-        {chats.map((item, index) => (
-          <ContextMenu>
-            <ContextMenuTrigger>
-              {selectedChat === item.id ? (
-                <div className='flex gap-2 m-1'>
-                  <Input
-                    placeholder='Choose a name...'
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onKeyUp={(e) => handleKeyPress(e)}
-                    onBlur={() => {
-                      if (title === item.title) {
+    <>
+      <ScrollArea className='flex-grow p-4'>
+        <nav className='grid gap-4 '>
+          {chats.map((item, index) => (
+            <ContextMenu>
+              <ContextMenuTrigger>
+                {selectedChat === item.id && isRenaming ? (
+                  <div className='flex gap-2 m-1'>
+                    <Input
+                      placeholder='Choose a name...'
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      onKeyUp={(e) => handleKeyPress(e)}
+                      onBlur={() => {
+                        if (title === item.title) {
+                          setSelectedChat(undefined);
+                          setIsRenaming(false);
+                        }
+                      }}
+                    />
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => {
                         setSelectedChat(undefined);
-                      }
-                    }}
-                  />
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => {
-                      setSelectedChat(undefined);
-                      setTitle('');
-                    }}
-                  >
-                    <X className='h-3 w-3' />
+                        setTitle('');
+                        setIsRenaming(false);
+                      }}
+                    >
+                      <X className='h-3 w-3' />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), currentChatId && item.id === currentChatId && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
+                    <item.icon className='mr-2 h-4 w-4' />
+                    {item.title}
                   </Button>
-                </div>
-              ) : (
-                <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), currentChatId && item.id === currentChatId && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
-                  <item.icon className='mr-2 h-4 w-4' />
-                  {item.title}
-                </Button>
-              )}
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem
-                className='flex gap-2'
-                onClick={() => {
-                  setSelectedChat(item.id);
-                  setTitle(item.title);
-                }}
-              >
-                <Pencil className='w-4 h-4' />
-                Rename
-              </ContextMenuItem>
-              <ContextMenuItem className='flex gap-2' onClick={() => deleteSelectedChat(item.id)}>
-                <Trash className='w-4 h-4' />
-                Delete
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        ))}
-      </nav>
-    </ScrollArea>
+                )}
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem
+                  className='flex gap-2'
+                  onClick={() => {
+                    setSelectedChat(item.id);
+                    setTitle(item.title);
+                    setIsRenaming(true);
+                  }}
+                >
+                  <Pencil className='w-4 h-4' />
+                  Rename
+                </ContextMenuItem>
+                <ContextMenuItem
+                  className='flex gap-2'
+                  onClick={() => {
+                    setSelectedChat(item.id);
+                    setOpen(true);
+                  }}
+                >
+                  <Trash className='w-4 h-4' />
+                  Delete
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          ))}
+        </nav>
+      </ScrollArea>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Chat</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. This will permanently delete this chat.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className={cn(buttonVariants({ variant: 'destructive' }))} onClick={() => deleteSelectedChat(selectedChat!)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   ) : (
     <div className='h-full ' />
   );
