@@ -1,13 +1,15 @@
-import { LucideIcon, Trash } from 'lucide-react';
+import { LucideIcon, Pencil, Trash, X } from 'lucide-react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { deleteChat } from '@/services/chat.service';
+import { deleteChat, updateChatName } from '@/services/chat.service';
 import { useAtom } from 'jotai';
 import { currentChatIdAtom } from '@/store/chatAtom';
 import { cn } from '@/lib/utils';
+import { KeyboardEvent, useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 interface NavProps {
   chats: {
@@ -21,6 +23,8 @@ interface NavProps {
 
 export function Nav({ chats, refetch, onClick }: NavProps) {
   const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom);
+  const [selectedChat, setSelectedChat] = useState<number | null>();
+  const [title, setTitle] = useState<string>('');
 
   const deleteSelectedChat = async (chatId: number): Promise<void> => {
     try {
@@ -34,18 +38,77 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
     }
   };
 
+  const updateChatTitle = async (chatId: number, name: string): Promise<void> => {
+    try {
+      await updateChatName(chatId, name);
+      setSelectedChat(undefined);
+      refetch();
+    } catch (error) {
+      toast('Error saving model message');
+      console.error(error);
+    }
+  };
+
+  const handleKeyPress = async (e: KeyboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+
+    if (e.key === 'Enter') {
+      if (title !== '') {
+        await updateChatTitle(selectedChat!, title);
+      }
+      setSelectedChat(undefined);
+      setTitle('');
+    }
+  };
+
   return chats.length > 0 ? (
     <ScrollArea className='flex-grow p-4'>
       <nav className='grid gap-4 '>
         {chats.map((item, index) => (
           <ContextMenu>
             <ContextMenuTrigger>
-              <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), currentChatId && item.id === currentChatId && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
-                <item.icon className='mr-2 h-4 w-4' />
-                {item.title}
-              </Button>
+              {selectedChat === item.id ? (
+                <div className='flex gap-2 m-1'>
+                  <Input
+                    placeholder='Choose a name...'
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onKeyUp={(e) => handleKeyPress(e)}
+                    onBlur={() => {
+                      if (title === item.title) {
+                        setSelectedChat(undefined);
+                      }
+                    }}
+                  />
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={() => {
+                      setSelectedChat(undefined);
+                      setTitle('');
+                    }}
+                  >
+                    <X className='h-3 w-3' />
+                  </Button>
+                </div>
+              ) : (
+                <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), currentChatId && item.id === currentChatId && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
+                  <item.icon className='mr-2 h-4 w-4' />
+                  {item.title}
+                </Button>
+              )}
             </ContextMenuTrigger>
             <ContextMenuContent>
+              <ContextMenuItem
+                className='flex gap-2'
+                onClick={() => {
+                  setSelectedChat(item.id);
+                  setTitle(item.title);
+                }}
+              >
+                <Pencil className='w-4 h-4' />
+                Rename
+              </ContextMenuItem>
               <ContextMenuItem className='flex gap-2' onClick={() => deleteSelectedChat(item.id)}>
                 <Trash className='w-4 h-4' />
                 Delete
