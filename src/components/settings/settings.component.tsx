@@ -28,7 +28,7 @@ export const Settings = (): ReactElement => {
   ];
 
   return (
-    <div className='hidden space-y-6 p-2 pb-16 md:block h-[500px]'>
+    <div className='hidden space-y-6 p-2 md:block'>
       <div className='flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0'>
         <aside className='-mx-4 lg:w-1/5'>
           <nav className={cn('flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1')}>
@@ -39,7 +39,7 @@ export const Settings = (): ReactElement => {
             ))}
           </nav>
         </aside>
-        <ScrollArea className='flex-1 lg:max-w-2xl px-4 h-[500px]'>{sidebarNavItems.filter((item) => item.href === selectedPage)[0].component()}</ScrollArea>
+        <ScrollArea className='flex-1 lg:max-w-2xl p-4 h-[510px]'>{sidebarNavItems.filter((item) => item.href === selectedPage)[0].component()}</ScrollArea>
       </div>
     </div>
   );
