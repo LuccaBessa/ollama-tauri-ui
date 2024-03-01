@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -11,8 +11,14 @@ import { OllamaService } from '@/services/ollama.service';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ModelResponse } from '@/services/models/model';
 import { Loader, Trash } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export function ModelForm() {
+  const [open, setOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>('');
+
   const getInstalledModelsList = async (): Promise<ModelResponse> => {
     try {
       return await OllamaService.getAllInstalledModels();
@@ -44,6 +50,7 @@ export function ModelForm() {
     try {
       OllamaService.downloadVersion(name);
       modelForm.reset();
+      setSelectedModel('');
       refetch();
     } catch (error) {
       toast(`Download ${name} failed`);
@@ -97,7 +104,7 @@ export function ModelForm() {
   return (
     <div className='flex flex-col px-1'>
       <Form {...ollamaForm}>
-        <form onSubmit={ollamaForm.handleSubmit(onSubmitOllama)} className='flex flex-col space-y-8'>
+        <form onSubmit={ollamaForm.handleSubmit(onSubmitOllama)} className='flex flex-col space-y-4'>
           <FormField
             control={ollamaForm.control}
             name='path'
@@ -117,7 +124,7 @@ export function ModelForm() {
         </form>
       </Form>
       <Form {...modelForm}>
-        <form onSubmit={modelForm.handleSubmit(onSubmitModel)} className='flex flex-col space-y-8'>
+        <form onSubmit={modelForm.handleSubmit(onSubmitModel)} className='flex flex-col space-y-4'>
           <FormField
             control={modelForm.control}
             name='query'
@@ -136,7 +143,7 @@ export function ModelForm() {
           </Button>
         </form>
       </Form>
-      <Table className='mt-6'>
+      <Table className='mt-4'>
         <TableHeader>
           <TableRow>
             <TableHead className='w-[100px]'>Model</TableHead>
@@ -155,7 +162,13 @@ export function ModelForm() {
                 <TableCell>{model.details.parameter_size}</TableCell>
                 <TableCell>
                   <Button variant='ghost' size='icon'>
-                    <Trash className='h-4 w-4' onClick={() => deleteModelMutation.mutate(model.name)} />
+                    <Trash
+                      className='h-4 w-4'
+                      onClick={() => {
+                        setSelectedModel(model.name);
+                        setOpen(true);
+                      }}
+                    />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -163,6 +176,20 @@ export function ModelForm() {
         </TableBody>
       </Table>
       {!data?.models || (data?.models.length === 0 && <p className='self-center mt-4'>No models installed</p>)}
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Model</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. This will permanently delete this model.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className={cn(buttonVariants({ variant: 'destructive' }))} onClick={() => deleteModelMutation.mutate(selectedModel)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
