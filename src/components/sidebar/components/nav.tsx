@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { KeyboardEvent, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NavProps {
   chats: {
@@ -99,10 +100,17 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
                     </Button>
                   </div>
                 ) : (
-                  <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost' }), currentChatId && item.id === currentChatId && 'bg-muted', 'justify-start w-full')} onClick={() => onClick(item.id)}>
-                    <item.icon className='mr-2 h-4 w-4' />
-                    {item.title}
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), currentChatId && item.id === currentChatId && 'bg-muted', 'flex justify-start w-[265px] gap-2')} onClick={() => onClick(item.id)}>
+                          <item.icon className='h-4 w-4' />
+                          <span className='text-ellipsis overflow-hidden'>{item.title}</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side='right'>{item.title}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </ContextMenuTrigger>
               <ContextMenuContent>

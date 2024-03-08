@@ -227,7 +227,7 @@ export default function Chat({ setIsSidebarOpen }: IProps) {
         )}
       </ScrollArea>
       <Form {...chatForm}>
-        <form onSubmit={chatForm.handleSubmit(onSubmitChat)} className='flex flex-row items-center w-[60%] mx-auto gap-2'>
+        <form onSubmit={chatForm.handleSubmit(onSubmitChat)} className='flex flex-row items-center w-[60%] mx-auto gap-2 px-4'>
           <FormField
             control={chatForm.control}
             name='message'

@@ -6,7 +6,6 @@ export class OllamaService {
   static async healthCheck(): Promise<void> {
     try {
       await http.get('/');
-      console.log('Health check successful.');
     } catch (error) {
       console.error('Health check failed:', error);
       throw new Error('Service is currently unavailable.');
@@ -26,7 +25,6 @@ export class OllamaService {
   static async deleteInstalledVersion(name: string): Promise<void> {
     try {
       await http.delete('/api/delete', { data: { name } });
-      console.log(`Model ${name} deleted successfully.`);
     } catch (error) {
       console.error(`Failed to delete model ${name}:`, error);
       throw new Error(`Unable to delete model ${name}.`);
@@ -36,7 +34,6 @@ export class OllamaService {
   static async downloadVersion(name: string): Promise<void> {
     try {
       await http.post('/api/pull', { name });
-      console.log(`Model ${name} downloaded successfully.`);
     } catch (error) {
       console.error(`Failed to download model ${name}:`, error);
       throw new Error(`Unable to download model ${name}.`);
@@ -46,7 +43,6 @@ export class OllamaService {
   static async generateChatCompletion(options: ChatRequestOptions): Promise<ChatResponse> {
     try {
       const response = await http.post<ChatResponse>('/api/chat', options);
-      console.log('Chat completion generated successfully.');
       return response.data;
     } catch (error) {
       console.error('Failed to generate chat completion:', error);

@@ -72,8 +72,6 @@ export async function getAllChats(): Promise<ChatSummary[]> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    console.log(db);
-
     const chatSummaries: ChatSummary[] = [];
 
     const chatResults = (await db.select('SELECT id, name, lastActivity FROM chats')) as ChatSummary[];
@@ -98,8 +96,6 @@ export async function updateChatName(chatId: number, newName: string): Promise<v
     const db = await Database.load('sqlite:chats.db');
 
     await db.execute('UPDATE chats SET name = ? WHERE id = ?', [newName, chatId]);
-
-    console.log('Chat name updated successfully.');
   } catch (error) {
     console.error('Error updating chat name:', error);
     throw new Error(`Unable to update chat name: ${error}.`);
