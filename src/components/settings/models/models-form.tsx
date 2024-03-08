@@ -2,20 +2,44 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { OllamaService } from '@/services/ollama.service';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ModelResponse } from '@/services/models/model';
 import { Loader, Trash } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { OllamaService } from '@/services/ollama.service';
+import { ModelResponse } from '@/services/models/model';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import { JSX } from 'react';
 
-export function ModelForm() {
+export function ModelForm(): JSX.Element {
   const [open, setOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string>('');
 
@@ -46,6 +70,21 @@ export function ModelForm() {
     mutationFn: deleteInstalledModel,
   });
 
+  const modelFormSchema = z.object({
+    query: z.string(),
+  });
+
+  type ModelFormValues = z.infer<typeof modelFormSchema>;
+
+  const defaultValuesModel: Partial<ModelFormValues> = {
+    query: '',
+  };
+
+  const modelForm = useForm<ModelFormValues>({
+    resolver: zodResolver(modelFormSchema),
+    defaultValues: defaultValuesModel,
+  });
+
   const downloadModel = async (name: string): Promise<void> => {
     try {
       OllamaService.downloadVersion(name);
@@ -72,84 +111,83 @@ export function ModelForm() {
     path: localStorage.getItem('base_ollama_url')!,
   };
 
-  const modelFormSchema = z.object({
-    query: z.string(),
-  });
-
-  type ModelFormValues = z.infer<typeof modelFormSchema>;
-
-  const defaultValuesModel: Partial<ModelFormValues> = {
-    query: '',
-  };
-
   const ollamaForm = useForm<OllamaFormValues>({
     resolver: zodResolver(ollamaFormSchema),
     defaultValues: defaultValuesOllama,
   });
 
-  function onSubmitOllama(data: OllamaFormValues) {
-    localStorage.setItem('base_ollama_url', data.path);
+  function onSubmitOllama(ollamaFormData: OllamaFormValues): void {
+    localStorage.setItem('base_ollama_url', ollamaFormData.path);
     toast('Ollama API path updated');
   }
 
-  const modelForm = useForm<ModelFormValues>({
-    resolver: zodResolver(modelFormSchema),
-    defaultValues: defaultValuesModel,
-  });
-
-  function onSubmitModel(data: ModelFormValues) {
-    downloadModelMutation.mutate(data.query);
+  function onSubmitModel(modelFormData: ModelFormValues): void {
+    downloadModelMutation.mutate(modelFormData.query);
   }
 
   return (
-    <div className='flex flex-col px-1'>
+    <div className="flex flex-col px-1">
       <Form {...ollamaForm}>
-        <form onSubmit={ollamaForm.handleSubmit(onSubmitOllama)} className='flex flex-col space-y-4'>
+        <form
+          onSubmit={ollamaForm.handleSubmit(onSubmitOllama)}
+          className="flex flex-col space-y-4"
+        >
           <FormField
             control={ollamaForm.control}
-            name='path'
+            name="path"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ollama API Path</FormLabel>
                 <FormControl>
-                  <Input placeholder='URL' {...field} />
+                  <Input placeholder="URL" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button className='self-end' type='submit'>
+          <Button className="self-end" type="submit">
             Update
           </Button>
         </form>
       </Form>
       <Form {...modelForm}>
-        <form onSubmit={modelForm.handleSubmit(onSubmitModel)} className='flex flex-col space-y-4'>
+        <form
+          onSubmit={modelForm.handleSubmit(onSubmitModel)}
+          className="flex flex-col space-y-4"
+        >
           <FormField
             control={modelForm.control}
-            name='query'
+            name="query"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Download Model</FormLabel>
                 <FormControl>
-                  <Input placeholder='Type the name of the model' {...field} />
+                  <Input placeholder="Type the name of the model" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button className='self-end' type='submit' disabled={downloadModelMutation.isPending}>
-            {downloadModelMutation.isPending ? <Loader className='h-4 w-4 animate-spin' /> : 'Download'}
+          <Button
+            className="self-end"
+            type="submit"
+            disabled={downloadModelMutation.isPending}
+          >
+            {downloadModelMutation.isPending ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              'Download'
+            )}
           </Button>
         </form>
       </Form>
-      <Table className='mt-4'>
+      <Table className="mt-4">
         <TableHeader>
           <TableRow>
-            <TableHead className='w-[100px]'>Model</TableHead>
+            <TableHead className="w-[100px]">Model</TableHead>
             <TableHead>Format</TableHead>
             <TableHead>Parameter Size</TableHead>
-            <TableHead className='text-right'></TableHead>
+            <TableHead className="text-right" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -157,13 +195,13 @@ export function ModelForm() {
             data?.models.length > 0 &&
             data?.models.map((model) => (
               <TableRow key={model.name}>
-                <TableCell className='font-medium'>{model.name}</TableCell>
+                <TableCell className="font-medium">{model.name}</TableCell>
                 <TableCell>{model.details.format}</TableCell>
                 <TableCell>{model.details.parameter_size}</TableCell>
                 <TableCell>
-                  <Button variant='ghost' size='icon'>
+                  <Button variant="ghost" size="icon">
                     <Trash
-                      className='h-4 w-4'
+                      className="h-4 w-4"
                       onClick={() => {
                         setSelectedModel(model.name);
                         setOpen(true);
@@ -175,16 +213,25 @@ export function ModelForm() {
             ))}
         </TableBody>
       </Table>
-      {!data?.models || (data?.models.length === 0 && <p className='self-center mt-4'>No models installed</p>)}
+      {!data?.models ||
+        (data?.models.length === 0 && (
+          <p className="self-center mt-4">No models installed</p>
+        ))}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Model</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. This will permanently delete this model.</AlertDialogDescription>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              model.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className={cn(buttonVariants({ variant: 'destructive' }))} onClick={() => deleteModelMutation.mutate(selectedModel)}>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: 'destructive' }))}
+              onClick={() => deleteModelMutation.mutate(selectedModel)}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
