@@ -10,13 +10,19 @@ import { currentChatIdAtom, defaultChat } from '@/store/chatAtom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
-import { Loader, Send } from 'lucide-react';
+import { Check, Clipboard, Loader, Menu, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useEffect, useRef, useState } from 'react';
 import { addMessage, createChat, getChat } from '@/services/chat.service';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+interface IProps {
+  setIsSidebarOpen: Function;
+}
 
 const chatFormSchema = z.object({
   message: z.string(),
@@ -28,9 +34,10 @@ const defaultValues: Partial<ChatFormValues> = {
   message: '',
 };
 
-export default function Chat() {
+export default function Chat({ setIsSidebarOpen }: IProps) {
   const [currentModel, setCurrentModel] = useState<string | undefined>(undefined);
   const [currentChat, setCurrentChat] = useState<IChat | undefined>(undefined);
+  const [wasCopied, setWasCopied] = useState<boolean>(false);
   const scrollAreaRef = useRef<any>(null);
 
   const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom);
@@ -47,6 +54,12 @@ export default function Chat() {
     resolver: zodResolver(chatFormSchema),
     defaultValues,
   });
+
+  const copyToClipboard = async (text: string) => {
+    await navigator.clipboard.writeText(text);
+    setWasCopied(true);
+    setTimeout(() => setWasCopied(false), 1000);
+  };
 
   const saveMessage = async (data: ChatResponse | undefined): Promise<void> => {
     try {
@@ -156,12 +169,55 @@ export default function Chat() {
 
   return (
     <div className='flex flex-col gap-4 p-4 w-full h-screen bg-[url("/ollama.png")] bg-no-repeat bg-center dark:bg-[url("/ollama_white.png")]'>
-      <ModelCombobox model={currentModel} setModel={setCurrentModel} />
+      <div className='flex gap-4'>
+        <Button variant='ghost' size='icon' onClick={() => setIsSidebarOpen((prev: boolean) => !prev)}>
+          <Menu />
+        </Button>
+        <ModelCombobox model={currentModel} setModel={setCurrentModel} />
+      </div>
       <ScrollArea ref={scrollAreaRef} className='flex-grow gap-2 p-4 w-[60%] mx-auto'>
         {currentChat &&
           currentChat.messages.map((message, index) => (
             <div key={index} className={cn('flex w-fit max-w-[60%] flex-col gap-2 rounded-lg px-3 py-2 text-sm mb-4 ', message.role === 'user' ? 'ml-auto bg-primary text-primary-foreground' : 'bg-muted')}>
-              {message.role === 'user' ? message.content : <ReactMarkdown>{message.content}</ReactMarkdown>}
+              {message.role === 'user' ? (
+                message.content
+              ) : (
+                <ReactMarkdown
+                  components={{
+                    code(props) {
+                      const { children, className, node, ref, ...rest } = props;
+                      const match = /language-(\w+)/.exec(className || '');
+                      return match ? (
+                        <>
+                          <div className='flex justify-between'>
+                            <p className='my-auto'>{match ? match[1] : ''}</p>
+                            <button className='flex gap-2' onClick={() => copyToClipboard(String(children))}>
+                              {wasCopied ? (
+                                <>
+                                  <Check className='w-4 h-4 my-auto' />
+                                  Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Clipboard className='w-4 h-4 my-auto' />
+                                  Copy code
+                                </>
+                              )}
+                            </button>
+                          </div>
+                          <SyntaxHighlighter {...rest} PreTag='div' wrapLongLines children={String(children).replace(/\n$/, '')} language={match[1]} style={atomDark} />
+                        </>
+                      ) : (
+                        <code {...rest} className={className}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              )}
             </div>
           ))}
         {sendMessageMutation.isPending && (
@@ -171,14 +227,14 @@ export default function Chat() {
         )}
       </ScrollArea>
       <Form {...chatForm}>
-        <form onSubmit={chatForm.handleSubmit(onSubmitChat)} className='flex flex-row items-center w-[60%] mx-auto gap-2'>
+        <form onSubmit={chatForm.handleSubmit(onSubmitChat)} className='flex flex-row items-center w-[60%] mx-auto gap-2 px-4'>
           <FormField
             control={chatForm.control}
             name='message'
             render={({ field }) => (
               <FormItem className='w-full'>
                 <FormControl>
-                  <Input placeholder='Message model...' disabled={currentModel === '' || !currentModel} {...field} />
+                  <Input placeholder='Message model...' disabled={currentModel === '' || !currentModel || sendMessageMutation.isPending} {...field} />
                 </FormControl>
               </FormItem>
             )}

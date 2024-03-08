@@ -3,10 +3,12 @@ import Sidebar from '@/components/sidebar/sidebar.component';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
 import { OllamaService } from '@/services/ollama.service';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+
   const healthCheckOllama = async (): Promise<void> => {
     try {
       return await OllamaService.healthCheck();
@@ -28,9 +30,9 @@ export default function App() {
   return (
     <>
       <main className='flex h-full'>
-        <Sidebar />
-        <Separator orientation='vertical' />
-        <Chat />
+        <Sidebar isOpen={isSidebarOpen} />
+        {isSidebarOpen && <Separator orientation='vertical' />}
+        <Chat setIsSidebarOpen={setIsSidebarOpen} />
       </main>
       <Toaster />
     </>
