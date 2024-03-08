@@ -1,11 +1,14 @@
-import { Chat, ChatSummary, Message } from '@/services/models/chat';
 import Database from '@tauri-apps/plugin-sql';
+import { Chat, ChatSummary, Message } from '@/services/models/chat';
 
 export async function createChat(name: string, model: string): Promise<number> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    const result = await db.execute('INSERT INTO chats (name, lastActivity, model) VALUES (?, ?, ?)', [name, new Date().toISOString(), model]);
+    const result = await db.execute(
+      'INSERT INTO chats (name, lastActivity, model) VALUES (?, ?, ?)',
+      [name, new Date().toISOString(), model]
+    );
 
     return result.lastInsertId;
   } catch (error) {
@@ -14,11 +17,18 @@ export async function createChat(name: string, model: string): Promise<number> {
   }
 }
 
-export async function addMessage(chatId: number, role: 'user' | 'assistant' | 'system', content: string): Promise<number> {
+export async function addMessage(
+  chatId: number,
+  role: 'user' | 'assistant' | 'system',
+  content: string
+): Promise<number> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    const result = await db.execute('INSERT INTO messages (chatId, role, content, timestamp) VALUES (?, ?, ?, ?)', [chatId, role, content, new Date().toISOString()]);
+    const result = await db.execute(
+      'INSERT INTO messages (chatId, role, content, timestamp) VALUES (?, ?, ?, ?)',
+      [chatId, role, content, new Date().toISOString()]
+    );
 
     return result.lastInsertId;
   } catch (error) {
@@ -36,7 +46,7 @@ export async function deleteChat(chatId: number): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Error deleting chat: ' + JSON.stringify(error));
+    console.error(`Error deleting chat: ${JSON.stringify(error)}`);
     throw new Error(`Unable to delete chat: ${error}.`);
   }
 }
@@ -45,7 +55,10 @@ export async function getChat(chatId: number): Promise<Chat | null> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    const chatResult: Chat[] = await db.select('SELECT * FROM chats WHERE id = $1', [chatId]);
+    const chatResult: Chat[] = await db.select(
+      'SELECT * FROM chats WHERE id = $1',
+      [chatId]
+    );
 
     if (chatResult.length === 0) {
       return null;
@@ -53,7 +66,10 @@ export async function getChat(chatId: number): Promise<Chat | null> {
 
     const chat = chatResult[0];
 
-    const messagesResult: Message[] = await db.select('SELECT * FROM messages WHERE chatId = $1 ORDER BY timestamp', [chatId]);
+    const messagesResult: Message[] = await db.select(
+      'SELECT * FROM messages WHERE chatId = $1 ORDER BY timestamp',
+      [chatId]
+    );
 
     return {
       id: chat.id,
@@ -63,7 +79,7 @@ export async function getChat(chatId: number): Promise<Chat | null> {
       messages: messagesResult,
     };
   } catch (error) {
-    console.error('Error getting chat: ' + error);
+    console.error(`Error getting chat: ${error}`);
     throw new Error(`Unable to get chat: ${error}.`);
   }
 }
@@ -74,7 +90,9 @@ export async function getAllChats(): Promise<ChatSummary[]> {
 
     const chatSummaries: ChatSummary[] = [];
 
-    const chatResults = (await db.select('SELECT id, name, lastActivity FROM chats')) as ChatSummary[];
+    const chatResults = (await db.select(
+      'SELECT id, name, lastActivity FROM chats'
+    )) as ChatSummary[];
 
     for (const chat of chatResults) {
       chatSummaries.push({
@@ -91,11 +109,17 @@ export async function getAllChats(): Promise<ChatSummary[]> {
   }
 }
 
-export async function updateChatName(chatId: number, newName: string): Promise<void> {
+export async function updateChatName(
+  chatId: number,
+  newName: string
+): Promise<void> {
   try {
     const db = await Database.load('sqlite:chats.db');
 
-    await db.execute('UPDATE chats SET name = ? WHERE id = ?', [newName, chatId]);
+    await db.execute('UPDATE chats SET name = ? WHERE id = ?', [
+      newName,
+      chatId,
+    ]);
   } catch (error) {
     console.error('Error updating chat name:', error);
     throw new Error(`Unable to update chat name: ${error}.`);

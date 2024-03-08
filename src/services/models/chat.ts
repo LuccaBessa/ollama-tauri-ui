@@ -18,7 +18,6 @@ export interface ChatRequestOptions {
   model: string;
   messages: Message[];
   format?: string;
-  options?: any;
   template?: string;
   stream?: boolean;
   keep_alive?: string;

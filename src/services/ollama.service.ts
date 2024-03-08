@@ -40,7 +40,9 @@ export class OllamaService {
     }
   }
 
-  static async generateChatCompletion(options: ChatRequestOptions): Promise<ChatResponse> {
+  static async generateChatCompletion(
+    options: ChatRequestOptions
+  ): Promise<ChatResponse> {
     try {
       const response = await http.post<ChatResponse>('/api/chat', options);
       return response.data;

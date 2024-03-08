@@ -1,17 +1,37 @@
 import { LucideIcon, Pencil, Trash, X } from 'lucide-react';
 
+import { toast } from 'sonner';
+import { useAtom } from 'jotai';
+import { KeyboardEvent, useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from 'sonner';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 import { deleteChat, updateChatName } from '@/services/chat.service';
-import { useAtom } from 'jotai';
 import { currentChatIdAtom } from '@/store/chatAtom';
 import { cn } from '@/lib/utils';
-import { KeyboardEvent, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { JSX } from 'react';
 
 interface NavProps {
   chats: {
@@ -19,11 +39,11 @@ interface NavProps {
     title: string;
     icon: LucideIcon;
   }[];
-  refetch: Function;
+  refetch: () => void;
   onClick: (id: number) => void;
 }
 
-export function Nav({ chats, refetch, onClick }: NavProps) {
+export function Nav({ chats, refetch, onClick }: NavProps): JSX.Element {
   const [currentChatId, setCurrentChatId] = useAtom(currentChatIdAtom);
   const [selectedChat, setSelectedChat] = useState<number | null>();
   const [title, setTitle] = useState<string>('');
@@ -42,7 +62,10 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
     }
   };
 
-  const updateChatTitle = async (chatId: number, name: string): Promise<void> => {
+  const updateChatTitle = async (
+    chatId: number,
+    name: string
+  ): Promise<void> => {
     try {
       await updateChatName(chatId, name);
       setSelectedChat(undefined);
@@ -53,7 +76,9 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
     }
   };
 
-  const handleKeyPress = async (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = async (
+    e: KeyboardEvent<HTMLInputElement>
+  ): Promise<void> => {
     e.preventDefault();
 
     if (e.key === 'Enter') {
@@ -68,15 +93,15 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
 
   return chats.length > 0 ? (
     <>
-      <ScrollArea className='flex-grow p-4'>
-        <nav className='grid gap-4 '>
+      <ScrollArea className="flex-grow p-4">
+        <nav className="grid gap-4 ">
           {chats.map((item, index) => (
-            <ContextMenu>
+            <ContextMenu key={index}>
               <ContextMenuTrigger>
                 {selectedChat === item.id && isRenaming ? (
-                  <div className='flex gap-2 m-1'>
+                  <div className="flex gap-2 m-1">
                     <Input
-                      placeholder='Choose a name...'
+                      placeholder="Choose a name..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       onKeyUp={(e) => handleKeyPress(e)}
@@ -88,51 +113,65 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
                       }}
                     />
                     <Button
-                      variant='ghost'
-                      size='icon'
+                      variant="ghost"
+                      size="icon"
                       onClick={() => {
                         setSelectedChat(undefined);
                         setTitle('');
                         setIsRenaming(false);
                       }}
                     >
-                      <X className='h-3 w-3' />
+                      <X className="h-3 w-3" />
                     </Button>
                   </div>
                 ) : (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Button key={index} variant='ghost' size='sm' className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), currentChatId && item.id === currentChatId && 'bg-muted', 'flex justify-start w-[265px] gap-2')} onClick={() => onClick(item.id)}>
-                          <item.icon className='h-4 w-4' />
-                          <span className='text-ellipsis overflow-hidden'>{item.title}</span>
+                        <Button
+                          key={index}
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            buttonVariants({ variant: 'ghost', size: 'sm' }),
+                            currentChatId &&
+                              item.id === currentChatId &&
+                              'bg-muted',
+                            'flex justify-start w-[265px] gap-2'
+                          )}
+                          onClick={() => onClick(item.id)}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="text-ellipsis overflow-hidden">
+                            {item.title}
+                          </span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side='right'>{item.title}</TooltipContent>
+                      <TooltipContent side="right">{item.title}</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 )}
               </ContextMenuTrigger>
               <ContextMenuContent>
                 <ContextMenuItem
-                  className='flex gap-2'
+                  className="flex gap-2"
                   onClick={() => {
                     setSelectedChat(item.id);
                     setTitle(item.title);
                     setIsRenaming(true);
                   }}
                 >
-                  <Pencil className='w-4 h-4' />
+                  <Pencil className="w-4 h-4" />
                   Rename
                 </ContextMenuItem>
                 <ContextMenuItem
-                  className='flex gap-2'
+                  className="flex gap-2"
                   onClick={() => {
                     setSelectedChat(item.id);
                     setOpen(true);
                   }}
                 >
-                  <Trash className='w-4 h-4' />
+                  <Trash className="w-4 h-4" />
                   Delete
                 </ContextMenuItem>
               </ContextMenuContent>
@@ -144,11 +183,17 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Chat</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. This will permanently delete this chat.</AlertDialogDescription>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              chat.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className={cn(buttonVariants({ variant: 'destructive' }))} onClick={() => deleteSelectedChat(selectedChat!)}>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: 'destructive' }))}
+              onClick={() => deleteSelectedChat(selectedChat!)}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -156,6 +201,6 @@ export function Nav({ chats, refetch, onClick }: NavProps) {
       </AlertDialog>
     </>
   ) : (
-    <div className='h-full ' />
+    <div className="h-full " />
   );
 }

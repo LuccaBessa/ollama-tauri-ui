@@ -6,7 +6,7 @@ export interface Model {
   details: {
     format: string;
     family: string;
-    families: null | any[];
+    families: null | string[];
     parameter_size: string;
     quantization_level: string;
   };
