@@ -2,6 +2,7 @@ import { Settings } from '@/components/settings/settings.component';
 import { Nav } from '@/components/sidebar/components/nav';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,11 @@ import { LucideIcon, MessagesSquare, Settings as SettingsIcon } from 'lucide-rea
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
-export default function Sidebar() {
+interface IProps {
+  isOpen: boolean;
+}
+
+export default function Sidebar({ isOpen }: IProps) {
   const [_, setCurrentChatId] = useAtom(currentChatIdAtom);
 
   const getChatsList = async (): Promise<ChatSummary[]> => {
@@ -54,40 +59,44 @@ export default function Sidebar() {
   }, [data]);
 
   return (
-    <div className='flex flex-col w-[300px] h-screen'>
-      <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')} onClick={() => setCurrentChatId(undefined)}>
-        <div className='flex item-center w-full justify-between'>
-          <span>New Chat</span>
-          <Pencil2Icon />
-        </div>
-      </Button>
-      <Separator />
-      <Nav chats={chatSummaryList} refetch={refetch} onClick={(id: number) => getChatInfo(id)} />
-      <Separator />
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')}>
-            <div className='flex items-center space-x-4'>
-              <Avatar>
-                <AvatarFallback>
-                  <SettingsIcon />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className='text-lg font-medium leading-none text-left'>Settings</p>
-              </div>
+    <Collapsible open={isOpen} defaultOpen>
+      <CollapsibleContent>
+        <div className='flex flex-col w-[300px] h-screen'>
+          <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')} onClick={() => setCurrentChatId(undefined)}>
+            <div className='flex item-center w-full justify-between'>
+              <span>New Chat</span>
+              <Pencil2Icon />
             </div>
           </Button>
-        </DialogTrigger>
-        <DialogContent className='min-w-[800px] min-h-[625px]'>
-          <DialogHeader>
-            <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>Manage OllamaUI settings and ollama preferences.</DialogDescription>
-          </DialogHeader>
           <Separator />
-          <Settings />
-        </DialogContent>
-      </Dialog>
-    </div>
+          <Nav chats={chatSummaryList} refetch={refetch} onClick={(id: number) => getChatInfo(id)} />
+          <Separator />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant='ghost' className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }), 'justify-start', 'p-2', 'm-2')}>
+                <div className='flex items-center space-x-4'>
+                  <Avatar>
+                    <AvatarFallback>
+                      <SettingsIcon />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className='text-lg font-medium leading-none text-left'>Settings</p>
+                  </div>
+                </div>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className='min-w-[800px] min-h-[625px]'>
+              <DialogHeader>
+                <DialogTitle>Settings</DialogTitle>
+                <DialogDescription>Manage OllamaUI settings and ollama preferences.</DialogDescription>
+              </DialogHeader>
+              <Separator />
+              <Settings />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
