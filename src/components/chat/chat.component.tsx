@@ -234,7 +234,7 @@ export default function Chat({ setIsSidebarOpen }: IProps) {
             render={({ field }) => (
               <FormItem className='w-full'>
                 <FormControl>
-                  <Input placeholder='Message model...' disabled={currentModel === '' || !currentModel} {...field} />
+                  <Input placeholder='Message model...' disabled={currentModel === '' || !currentModel || sendMessageMutation.isPending} {...field} />
                 </FormControl>
               </FormItem>
             )}
